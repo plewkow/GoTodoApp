@@ -48,7 +48,7 @@ func (r *TaskRepository) load() error {
 }
 
 func (r *TaskRepository) save() error {
-	data, err := json.Marshal(r.tasks)
+	data, err := json.MarshalIndent(r.tasks, "", " ")
 	if err != nil {
 		return err
 	}

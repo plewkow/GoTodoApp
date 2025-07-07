@@ -3,10 +3,10 @@ package models
 import "time"
 
 type Task struct {
-	Id          int
-	Title       string
-	Description string
-	DueDate     time.Time
-	Status      Status
-	UserId      int
+	Id          int       `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"due_date"`
+	Status      Status    `json:"status"`
+	UserId      int       `json:"user_id"`
 }
