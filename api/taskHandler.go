@@ -2,7 +2,9 @@ package api
 
 import (
 	"draft-zadania-1/dto"
+	appErr "draft-zadania-1/errors"
 	"draft-zadania-1/services"
+	"draft-zadania-1/utils"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
@@ -23,23 +25,16 @@ func (h *TaskHandler) GetAllTasks(c echo.Context) error {
 }
 
 func (h *TaskHandler) CreateTask(c echo.Context) error {
-	var createDto dto.CreateTaskDTO
-	if err := c.Bind(&createDto); err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid input"})
+	var createDto dto.TaskDTO
+	if err := utils.BindAndValidate(c, &createDto); err != nil {
+		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
-	//if err := h.Validate.Struct(createDto); err != nil {
-	//	return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
-	//}
-
-	task := dto.ToTaskCreate(createDto)
-
+	task := dto.ToTask(createDto)
 	created, err := h.Service.CreateTask(task)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+		return utils.WriteAppError(c, err)
 	}
-
-	var response dto.ResponseTaskDTO
-	response = dto.ToResponseTaskDTO(created)
+	response := dto.ToResponseTaskDTO(created)
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -47,20 +42,13 @@ func (h *TaskHandler) GetTaskById(c echo.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
 	task, err := h.Service.GetTaskById(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.WriteAppError(c, err)
 	}
-
-	//var response []dto.ResponseUserDTO
-	//response = append(response, dto.ResponseUserDTO{
-	//	Username: user.Username,
-	//	Email:    user.Email,
-	//})
-	var response dto.ResponseTaskDTO
-	response = dto.ToResponseTaskDTO(task)
+	response := dto.ToResponseTaskDTO(task)
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -68,13 +56,12 @@ func (h *TaskHandler) GetTaskByUserId(c echo.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
 	tasks, err := h.Service.GetTasksByUserId(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.WriteAppError(c, err)
 	}
-
 	response := dto.ToResponseTaskDTOs(tasks)
 	return c.JSON(http.StatusOK, response)
 }
@@ -83,22 +70,18 @@ func (h *TaskHandler) UpdateTask(c echo.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
-
-	var updateDto dto.UpdateTaskDTO
-	if err := c.Bind(&updateDto); err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid input"})
+	var updateDto dto.TaskDTO
+	if err := utils.BindAndValidate(c, &updateDto); err != nil {
+		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
-
 	task := dto.ToTask(updateDto)
 	task.Id = id
-
 	updated, err := h.Service.UpdateTask(task)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+		return utils.WriteAppError(c, err)
 	}
-
 	response := dto.ToResponseTaskDTO(updated)
 	return c.JSON(http.StatusNoContent, response)
 }
@@ -107,16 +90,14 @@ func (h *TaskHandler) DeleteTask(c echo.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
 	err = h.Service.DeleteTask(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.WriteAppError(c, err)
 	}
-
 	response := echo.Map{
 		"message": "Task deleted successfully",
 	}
-
 	return c.JSON(http.StatusNoContent, response)
 }

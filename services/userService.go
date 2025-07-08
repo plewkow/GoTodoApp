@@ -1,8 +1,10 @@
 package services
 
 import (
+	appErr "draft-zadania-1/errors"
 	"draft-zadania-1/models"
 	"draft-zadania-1/repo"
+	"errors"
 )
 
 type UserService struct {
@@ -14,21 +16,50 @@ func NewUserService(repo *repo.UserRepository) *UserService {
 }
 
 func (s *UserService) CreateUser(user models.User) (models.User, error) {
-	return s.repo.Create(user)
+	user, err := s.repo.Create(user)
+	if err != nil {
+		return models.User{}, appErr.ErrInternal
+	}
+	return user, nil
 }
 
 func (s *UserService) UpdateUser(user models.User) (models.User, error) {
-	return s.repo.Update(user)
+	user, err := s.repo.Update(user)
+	if err != nil {
+		if errors.Is(err, appErr.ErrUserNotFound) {
+			return models.User{}, appErr.ErrUserNotFound
+		}
+		return models.User{}, appErr.ErrInternal
+	}
+	return user, nil
 }
 
 func (s *UserService) GetAllUsers() ([]models.User, error) {
-	return s.repo.GetAll()
+	users, err := s.repo.GetAll()
+	if err != nil {
+		return []models.User{}, appErr.ErrInternal
+	}
+	return users, nil
 }
 
 func (s *UserService) GetUserById(id int) (models.User, error) {
-	return s.repo.GetById(id)
+	user, err := s.repo.GetById(id)
+	if err != nil {
+		if errors.Is(err, appErr.ErrUserNotFound) {
+			return models.User{}, appErr.ErrUserNotFound
+		}
+		return models.User{}, appErr.ErrInternal
+	}
+	return user, nil
 }
 
 func (s *UserService) DeleteUserById(id int) error {
-	return s.repo.Delete(id)
+	err := s.repo.Delete(id)
+	if err != nil {
+		if errors.Is(err, appErr.ErrUserNotFound) {
+			return appErr.ErrUserNotFound
+		}
+		return appErr.ErrInternal
+	}
+	return nil
 }

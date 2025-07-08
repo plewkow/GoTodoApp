@@ -1,9 +1,9 @@
 package repo
 
 import (
+	appErr "draft-zadania-1/errors"
 	"draft-zadania-1/models"
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -20,7 +20,7 @@ func NewTaskRepository() (*TaskRepository, error) {
 		nextId: 1,
 	}
 	if err := r.load(); err != nil {
-		return nil, err
+		return nil, appErr.ErrInternal
 	}
 	return r, nil
 }
@@ -32,10 +32,10 @@ func (r *TaskRepository) load() error {
 			r.tasks = []models.Task{}
 			return r.save()
 		}
-		return err
+		return appErr.ErrInternal
 	}
 	if err := json.Unmarshal(data, &r.tasks); err != nil {
-		return err
+		return appErr.ErrInternal
 	}
 	maxId := 0
 	for _, task := range r.tasks {
@@ -50,7 +50,7 @@ func (r *TaskRepository) load() error {
 func (r *TaskRepository) save() error {
 	data, err := json.MarshalIndent(r.tasks, "", " ")
 	if err != nil {
-		return err
+		return appErr.ErrInternal
 	}
 	return os.WriteFile(r.file, data, 0644)
 }
@@ -71,7 +71,7 @@ func (r *TaskRepository) Update(task models.Task) (models.Task, error) {
 			return task, err
 		}
 	}
-	return models.Task{}, fmt.Errorf("task not found")
+	return models.Task{}, appErr.ErrTaskNotFound
 }
 
 func (r *TaskRepository) Delete(id int) error {
@@ -83,7 +83,7 @@ func (r *TaskRepository) Delete(id int) error {
 		}
 	}
 	if index == -1 {
-		return fmt.Errorf("task with id %d not found", id)
+		return appErr.ErrTaskNotFound
 	}
 	r.tasks = append(r.tasks[:index], r.tasks[index+1:]...)
 	return r.save()
@@ -98,9 +98,10 @@ func (r *TaskRepository) GetById(id int) (models.Task, error) {
 	for _, task := range r.tasks {
 		if task.Id == id {
 			result = task
+			return result, nil
 		}
 	}
-	return result, fmt.Errorf("task not found")
+	return models.Task{}, appErr.ErrTaskNotFound
 }
 
 func (r *TaskRepository) GetByUserId(userId int) ([]models.Task, error) {
@@ -108,7 +109,8 @@ func (r *TaskRepository) GetByUserId(userId int) ([]models.Task, error) {
 	for _, t := range r.tasks {
 		if t.UserId == userId {
 			result = append(result, t)
+			return result, nil
 		}
 	}
-	return result, fmt.Errorf("user not found")
+	return result, appErr.ErrTaskNotFound
 }

@@ -12,11 +12,15 @@ func (e *AppError) Error() string {
 	return e.Message
 }
 
-// Przykładowe błędy
 var (
 	ErrUserNotFound = &AppError{
 		Code:    "USER_NOT_FOUND",
 		Message: "User not found",
+		Status:  http.StatusNotFound,
+	}
+	ErrTaskNotFound = &AppError{
+		Code:    "TASK_NOT_FOUND",
+		Message: "Task not found",
 		Status:  http.StatusNotFound,
 	}
 	ErrInvalidInput = &AppError{

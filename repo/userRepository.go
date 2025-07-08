@@ -1,9 +1,9 @@
 package repo
 
 import (
+	appErr "draft-zadania-1/errors"
 	"draft-zadania-1/models"
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -20,7 +20,7 @@ func NewUserRepository() (*UserRepository, error) {
 		users:  []models.User{},
 	}
 	if err := r.load(); err != nil {
-		return nil, err
+		return nil, appErr.ErrInternal
 	}
 	return r, nil
 }
@@ -28,7 +28,7 @@ func NewUserRepository() (*UserRepository, error) {
 func (r *UserRepository) save() error {
 	data, err := json.Marshal(r.users)
 	if err != nil {
-		return err
+		return appErr.ErrInternal
 	}
 	return os.WriteFile(r.file, data, 0644)
 }
@@ -40,10 +40,10 @@ func (r *UserRepository) load() error {
 			r.users = []models.User{}
 			return r.save()
 		}
-		return err
+		return appErr.ErrInternal
 	}
 	if err := json.Unmarshal(data, &r.users); err != nil {
-		return err
+		return appErr.ErrInternal
 	}
 	maxId := 0
 	for _, user := range r.users {
@@ -71,7 +71,7 @@ func (r *UserRepository) Update(user models.User) (models.User, error) {
 			return user, err
 		}
 	}
-	return models.User{}, fmt.Errorf("user not found")
+	return models.User{}, appErr.ErrUserNotFound
 }
 
 func (r *UserRepository) GetAll() ([]models.User, error) {
@@ -84,7 +84,7 @@ func (r *UserRepository) GetById(id int) (models.User, error) {
 			return user, nil
 		}
 	}
-	return models.User{}, fmt.Errorf("user with ID %d not found", id)
+	return models.User{}, appErr.ErrUserNotFound
 }
 
 func (r *UserRepository) Delete(id int) error {
@@ -96,7 +96,7 @@ func (r *UserRepository) Delete(id int) error {
 		}
 	}
 	if index == -1 {
-		return fmt.Errorf("user with id %d not found", id)
+		return appErr.ErrUserNotFound
 	}
 	r.users = append(r.users[:index], r.users[index+1:]...)
 	return r.save()

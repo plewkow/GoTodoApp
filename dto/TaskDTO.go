@@ -2,38 +2,19 @@ package dto
 
 import "time"
 
-type CreateTaskDTO struct {
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	DueDate     time.Time `json:"due_date"`
-	Status      Status    `json:"status"`
-	UserId      int       `json:"user_id"`
-}
-
-type Status int
-
-const (
-	Todo Status = iota
-	InProgress
-	Done
-)
-
-func (status Status) String() string {
-	return [3]string{"Todo", "InProgress", "Done"}[status]
+type TaskDTO struct {
+	Title       string    `json:"title" validate:"required"`
+	Description string    `json:"description" validate:"required"`
+	DueDate     time.Time `json:"due_date" validate:"required"`
+	Status      int       `json:"status" validate:"required"`
+	UserId      int       `json:"user_id" validate:"required"`
 }
 
 type ResponseTaskDTO struct {
+	Id          int       `json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	DueDate     time.Time `json:"due_date"`
-	Status      Status    `json:"status"`
-	UserId      int       `json:"user_id"`
-}
-
-type UpdateTaskDTO struct {
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	DueDate     time.Time `json:"due_date"`
-	Status      int       `json:"status"`
+	Status      string    `json:"status"`
 	UserId      int       `json:"user_id"`
 }
