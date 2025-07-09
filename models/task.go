@@ -12,4 +12,6 @@ type Task struct {
 	DueDate     time.Time `json:"due_date"`
 	Status      Status    `json:"status"`
 	UserId      uuid.UUID `gorm:"not null" json:"user_id"`
+
+	User User `gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
