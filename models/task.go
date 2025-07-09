@@ -1,12 +1,15 @@
 package models
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type Task struct {
-	Id          int       `json:"id"`
+	Id          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	DueDate     time.Time `json:"due_date"`
 	Status      Status    `json:"status"`
-	UserId      int       `json:"user_id"`
+	UserId      uuid.UUID `gorm:"not null" json:"user_id"`
 }

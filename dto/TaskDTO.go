@@ -7,14 +7,14 @@ type TaskDTO struct {
 	Description string    `json:"description" validate:"required"`
 	DueDate     time.Time `json:"due_date" validate:"required"`
 	Status      int       `json:"status" validate:"required"`
-	UserId      int       `json:"user_id" validate:"required"`
+	UserId      string    `json:"user_id" validate:"required"`
 }
 
 type ResponseTaskDTO struct {
-	Id          int       `json:"id"`
+	Id          string    `json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	DueDate     time.Time `json:"due_date"`
 	Status      string    `json:"status"`
-	UserId      int       `json:"user_id"`
+	UserId      string    `json:"user_id"`
 }

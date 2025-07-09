@@ -3,101 +3,71 @@ package repo
 import (
 	appErr "draft-zadania-1/errors"
 	"draft-zadania-1/models"
-	"encoding/json"
-	"os"
+	"errors"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type UserRepository struct {
-	users  []models.User
-	nextId int
-	file   string
+	db *gorm.DB
 }
 
-func NewUserRepository() (*UserRepository, error) {
-	r := &UserRepository{
-		file:   "data/users.json",
-		nextId: 0,
-		users:  []models.User{},
-	}
-	if err := r.load(); err != nil {
+func NewUserRepository(db *gorm.DB) *UserRepository {
+	return &UserRepository{db: db}
+}
+
+func (r *UserRepository) Create(user models.User) (*models.User, error) {
+	if err := r.db.Create(&user).Error; err != nil {
 		return nil, appErr.ErrInternal
 	}
-	return r, nil
+	return &user, nil
 }
 
-func (r *UserRepository) save() error {
-	data, err := json.Marshal(r.users)
-	if err != nil {
-		return appErr.ErrInternal
-	}
-	return os.WriteFile(r.file, data, 0644)
-}
-
-func (r *UserRepository) load() error {
-	data, err := os.ReadFile(r.file)
-	if err != nil {
-		if os.IsNotExist(err) {
-			r.users = []models.User{}
-			return r.save()
+func (r *UserRepository) Update(user models.User) (*models.User, error) {
+	var existingUser models.User
+	if err := r.db.First(&existingUser, user.Id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, appErr.ErrUserNotFound
 		}
-		return appErr.ErrInternal
+		return nil, appErr.ErrInternal
 	}
-	if err := json.Unmarshal(data, &r.users); err != nil {
-		return appErr.ErrInternal
-	}
-	maxId := 0
-	for _, user := range r.users {
-		if user.Id > maxId {
-			maxId = user.Id
-		}
-	}
-	r.nextId = maxId + 1
-	return nil
-}
 
-func (r *UserRepository) Create(user models.User) (models.User, error) {
-	user.Id = r.nextId
-	r.nextId++
-	r.users = append(r.users, user)
-	err := r.save()
-	return user, err
-}
-
-func (r *UserRepository) Update(user models.User) (models.User, error) {
-	for i, u := range r.users {
-		if u.Id == user.Id {
-			r.users[i] = user
-			err := r.save()
-			return user, err
-		}
+	if err := r.db.Save(&user).Error; err != nil {
+		return nil, appErr.ErrInternal
 	}
-	return models.User{}, appErr.ErrUserNotFound
+	return &user, nil
 }
 
 func (r *UserRepository) GetAll() ([]models.User, error) {
-	return r.users, nil
+	var users []models.User
+	if err := r.db.Find(&users).Error; err != nil {
+		return nil, appErr.ErrInternal
+	}
+	return users, nil
 }
 
-func (r *UserRepository) GetById(id int) (models.User, error) {
-	for _, user := range r.users {
-		if user.Id == id {
-			return user, nil
+func (r *UserRepository) GetById(id uuid.UUID) (*models.User, error) {
+	var user models.User
+	if err := r.db.First(&user, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, appErr.ErrUserNotFound
 		}
+		return nil, appErr.ErrInternal
 	}
-	return models.User{}, appErr.ErrUserNotFound
+	return &user, nil
 }
 
-func (r *UserRepository) Delete(id int) error {
-	index := -1
-	for i, user := range r.users {
-		if user.Id == id {
-			index = i
-			break
+func (r *UserRepository) Delete(id uuid.UUID) error {
+	var user models.User
+	if err := r.db.First(&user, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return appErr.ErrUserNotFound
 		}
+		return appErr.ErrInternal
 	}
-	if index == -1 {
-		return appErr.ErrUserNotFound
+
+	if err := r.db.Delete(&user).Error; err != nil {
+		return appErr.ErrInternal
 	}
-	r.users = append(r.users[:index], r.users[index+1:]...)
-	return r.save()
+	return nil
 }

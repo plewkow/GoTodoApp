@@ -2,7 +2,6 @@ package dto
 
 import (
 	"draft-zadania-1/models"
-	"strconv"
 )
 
 func ToUser(dto UserDTO) models.User {
@@ -14,7 +13,7 @@ func ToUser(dto UserDTO) models.User {
 
 func ToResponseUserDTO(user models.User) ResponseUserDTO {
 	return ResponseUserDTO{
-		Id:       strconv.Itoa(user.Id),
+		Id:       user.Id.String(),
 		Username: user.Username,
 		Email:    user.Email,
 	}

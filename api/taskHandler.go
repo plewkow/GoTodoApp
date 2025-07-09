@@ -5,9 +5,9 @@ import (
 	appErr "draft-zadania-1/errors"
 	"draft-zadania-1/services"
 	"draft-zadania-1/utils"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strconv"
 )
 
 type TaskHandler struct {
@@ -17,9 +17,8 @@ type TaskHandler struct {
 func (h *TaskHandler) GetAllTasks(c echo.Context) error {
 	tasks, err := h.Service.GetAllTasks()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.WriteAppError(c, err)
 	}
-
 	response := dto.ToResponseTaskDTOs(tasks)
 	return c.JSON(http.StatusOK, response)
 }
@@ -34,13 +33,13 @@ func (h *TaskHandler) CreateTask(c echo.Context) error {
 	if err != nil {
 		return utils.WriteAppError(c, err)
 	}
-	response := dto.ToResponseTaskDTO(created)
+	response := dto.ToResponseTaskDTO(*created)
 	return c.JSON(http.StatusOK, response)
 }
 
 func (h *TaskHandler) GetTaskById(c echo.Context) error {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
@@ -48,13 +47,13 @@ func (h *TaskHandler) GetTaskById(c echo.Context) error {
 	if err != nil {
 		return utils.WriteAppError(c, err)
 	}
-	response := dto.ToResponseTaskDTO(task)
+	response := dto.ToResponseTaskDTO(*task)
 	return c.JSON(http.StatusOK, response)
 }
 
 func (h *TaskHandler) GetTaskByUserId(c echo.Context) error {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
@@ -68,7 +67,7 @@ func (h *TaskHandler) GetTaskByUserId(c echo.Context) error {
 
 func (h *TaskHandler) UpdateTask(c echo.Context) error {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
@@ -82,13 +81,13 @@ func (h *TaskHandler) UpdateTask(c echo.Context) error {
 	if err != nil {
 		return utils.WriteAppError(c, err)
 	}
-	response := dto.ToResponseTaskDTO(updated)
+	response := dto.ToResponseTaskDTO(*updated)
 	return c.JSON(http.StatusNoContent, response)
 }
 
 func (h *TaskHandler) DeleteTask(c echo.Context) error {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}

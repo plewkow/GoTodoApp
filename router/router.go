@@ -9,7 +9,7 @@ func RegisterRoutes(e *echo.Echo, taskHandler *api.TaskHandler, userHandler *api
 	// TASKS
 	e.GET("/api/tasks", taskHandler.GetAllTasks)
 	e.GET("/api/tasks/:id", taskHandler.GetTaskById)
-	e.GET("/api/tasks/user/task", taskHandler.GetTaskById)
+	e.GET("/api/tasks/user/:id", taskHandler.GetTaskByUserId)
 	e.POST("/api/tasks", taskHandler.CreateTask)
 	e.PUT("/api/tasks/:id", taskHandler.UpdateTask)
 	e.DELETE("/api/tasks/:id", taskHandler.DeleteTask)

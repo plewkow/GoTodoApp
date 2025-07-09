@@ -11,6 +11,7 @@ func WriteAppError(c echo.Context, err error) error {
 		return c.JSON(appErr.Status, echo.Map{
 			"code":    appErr.Code,
 			"message": appErr.Message,
+			"status":  appErr.Status,
 		})
 	}
 	return c.JSON(http.StatusInternalServerError, echo.Map{

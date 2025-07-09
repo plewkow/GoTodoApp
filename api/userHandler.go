@@ -5,11 +5,11 @@ import (
 	appErr "draft-zadania-1/errors"
 	"draft-zadania-1/services"
 	"draft-zadania-1/utils"
+	"github.com/google/uuid"
 
 	//"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strconv"
 )
 
 type UserHandler struct {
@@ -27,7 +27,7 @@ func (h *UserHandler) GetAllUsers(c echo.Context) error {
 
 func (h *UserHandler) GetUserById(c echo.Context) error {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
@@ -35,7 +35,7 @@ func (h *UserHandler) GetUserById(c echo.Context) error {
 	if err != nil {
 		return utils.WriteAppError(c, err)
 	}
-	response := dto.ToResponseUserDTO(user)
+	response := dto.ToResponseUserDTO(*user)
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -49,13 +49,13 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 	if err != nil {
 		return utils.WriteAppError(c, err)
 	}
-	response := dto.ToResponseUserDTO(created)
+	response := dto.ToResponseUserDTO(*created)
 	return c.JSON(http.StatusCreated, response)
 }
 
 func (h *UserHandler) UpdateUser(c echo.Context) error {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}
@@ -69,13 +69,13 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	if err != nil {
 		return utils.WriteAppError(c, err)
 	}
-	response := dto.ToResponseUserDTO(updated)
+	response := dto.ToResponseUserDTO(*updated)
 	return c.JSON(http.StatusNoContent, response)
 }
 
 func (h *UserHandler) DeleteUser(c echo.Context) error {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return utils.WriteAppError(c, appErr.ErrInvalidInput)
 	}

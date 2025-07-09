@@ -5,6 +5,7 @@ import (
 	"draft-zadania-1/models"
 	"draft-zadania-1/repo"
 	"errors"
+	"github.com/google/uuid"
 )
 
 type UserService struct {
@@ -15,23 +16,23 @@ func NewUserService(repo *repo.UserRepository) *UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) CreateUser(user models.User) (models.User, error) {
-	user, err := s.repo.Create(user)
+func (s *UserService) CreateUser(user models.User) (*models.User, error) {
+	createdUser, err := s.repo.Create(user)
 	if err != nil {
-		return models.User{}, appErr.ErrInternal
+		return nil, appErr.ErrInternal
 	}
-	return user, nil
+	return createdUser, nil
 }
 
-func (s *UserService) UpdateUser(user models.User) (models.User, error) {
-	user, err := s.repo.Update(user)
+func (s *UserService) UpdateUser(user models.User) (*models.User, error) {
+	updatedUser, err := s.repo.Update(user)
 	if err != nil {
 		if errors.Is(err, appErr.ErrUserNotFound) {
-			return models.User{}, appErr.ErrUserNotFound
+			return nil, appErr.ErrUserNotFound
 		}
-		return models.User{}, appErr.ErrInternal
+		return nil, appErr.ErrInternal
 	}
-	return user, nil
+	return updatedUser, nil
 }
 
 func (s *UserService) GetAllUsers() ([]models.User, error) {
@@ -42,18 +43,18 @@ func (s *UserService) GetAllUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (s *UserService) GetUserById(id int) (models.User, error) {
+func (s *UserService) GetUserById(id uuid.UUID) (*models.User, error) {
 	user, err := s.repo.GetById(id)
 	if err != nil {
 		if errors.Is(err, appErr.ErrUserNotFound) {
-			return models.User{}, appErr.ErrUserNotFound
+			return nil, appErr.ErrUserNotFound
 		}
-		return models.User{}, appErr.ErrInternal
+		return nil, appErr.ErrInternal
 	}
 	return user, nil
 }
 
-func (s *UserService) DeleteUserById(id int) error {
+func (s *UserService) DeleteUserById(id uuid.UUID) error {
 	err := s.repo.Delete(id)
 	if err != nil {
 		if errors.Is(err, appErr.ErrUserNotFound) {
