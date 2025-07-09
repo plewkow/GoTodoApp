@@ -1,10 +1,13 @@
-​# CRUD application
+# CRUD application
+### NOW
 
-## Goals
+TODO CRUD Application with REST API with PostgreSQL Database.
+Echo framework and Gorm.
 
-The goal of this exercise is to create a command-line interface (CLI) TODO application that allows users to manage their tasks. The application should support CRUD operations (Create, Read, Update, Delete) for both users and tasks entities.
+### BEFORE
+CLI Application
 
-## Basic Requirements
+#### Basic Requirements
 
 1. User Management
     - The application should allow users to create, read, update, and delete user profiles.
@@ -27,41 +30,3 @@ The goal of this exercise is to create a command-line interface (CLI) TODO appli
 7. User-Friendly Outputs
     - The application should display task lists and user profiles in a user-friendly and readable format.
     - Task lists should provide relevant details and clearly indicate task status and due dates.
-
-## Sample usage
-
-Example 1
-
-```shell 
-$ ./crud get_all_tasks 
-  [{"id":1,"name":"go to work","done":"true"},{"id":2,"name":"prepare dinner","done":"false"}] 
-``` 
-
-Example 2
-
-```shell 
-$ ./crud get_all_users 
-  [{"id":1,"username":"user1","email":"user1@example.com"},{"id":2,"username":"user2","email":"user2@example.com"}] 
-``` 
-
-Example 3
-
-```shell 
-$ ./crud create_task task.json 
-  task created with id: 3 
-``` 
-
-Example 4
-
-```shell 
-$ ./crud delete_user 2 
-  user deleted 
-``` 
-
-Example 5
-
-```shell 
-$ ./crud get_user_by_id 2 
-  error: user not found 
-``` 
-  
