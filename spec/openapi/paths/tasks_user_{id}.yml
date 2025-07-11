@@ -1,0 +1,40 @@
+parameters:
+  - name: id
+    in: path
+    description: User ID (UUID)
+    required: true
+    schema:
+      type: string
+      format: uuid
+
+get:
+  summary: Get tasks by user ID
+  operationId: getTasksByUserId
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    '200':
+      description: List of tasks for user
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../components/Task.yml"
+    '400':
+      description: Invalid user ID
+      content:
+        application/json:
+          schema:
+            $ref: "../components/Error.yml"
+    '404':
+      description: User not found or no tasks
+      content:
+        application/json:
+          schema:
+            $ref: "../components/Error.yml"

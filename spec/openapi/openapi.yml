@@ -1,0 +1,34 @@
+openapi: 3.0.0
+info:
+  title: TODO CRUD App API
+  version: 0.5.1
+  description: API for managing users and tasks
+servers:
+  - url: http://localhost:8080/api
+#tags:
+#  - name:
+paths:
+    /users:
+      $ref: "paths/users.yml"
+    /users/{id}:
+      $ref: "paths/users_{id}.yml"
+    /tasks:
+      $ref: "paths/tasks.yml"
+    /tasks/{id}:
+      $ref: "paths/tasks_{id}.yml"
+    /tasks/user/{id}:
+      $ref: "paths/tasks_user_{id}.yml"
+
+components:
+  schemas:
+    User:
+      $ref: "components/User.yml"
+    Task:
+      $ref: "components/Task.yml"
+    Status:
+      $ref: "components/Status.yml"
+    Error:
+      $ref: "components/Error.yml"
+
+
+

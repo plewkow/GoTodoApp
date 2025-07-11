@@ -1,0 +1,96 @@
+parameters:
+  - name: id
+    in: path
+    description: Task ID (UUID)
+    required: true
+    schema:
+      type: string
+      format: uuid
+
+get:
+  summary: Get task by ID
+  operationId: getTaskById
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    '200':
+      description: Task details
+      content:
+        application/json:
+          schema:
+            $ref: "../components/Task.yml"
+    '400':
+      description: Invalid task ID
+      content:
+        application/json:
+          schema:
+            $ref: "../components/Error.yml"
+    '404':
+      description: Task not found
+      content:
+        application/json:
+          schema:
+            $ref: "../components/Error.yml"
+
+put:
+  summary: Update task by ID
+  operationId: updateTask
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../components/Task.yml"
+  responses:
+    '204':
+      description: Task updated successfully
+    '400':
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: "../components/Error.yml"
+    '404':
+      description: Task not found
+      content:
+        application/json:
+          schema:
+            $ref: "../components/Error.yml"
+
+delete:
+  summary: Delete task by ID
+  operationId: deleteTask
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    '204':
+      description: Task deleted successfully
+    '400':
+      description: Invalid task ID
+      content:
+        application/json:
+          schema:
+            $ref: "../components/Error.yml"
+    '404':
+      description: Task not found
+      content:
+        application/json:
+          schema:
+            $ref: "../components/Error.yml"
