@@ -8,6 +8,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type UserRepoInterface interface {
+	Create(user models.User) (*models.User, error)
+	Update(user models.User) (*models.User, error)
+	GetAll() ([]models.User, error)
+	GetById(id uuid.UUID) (*models.User, error)
+	Delete(id uuid.UUID) error
+}
+
 type UserRepository struct {
 	db *gorm.DB
 }
