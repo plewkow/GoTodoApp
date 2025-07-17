@@ -1,20 +1,25 @@
 package services
 
 import (
+	"context"
 	appErr "draft-zadania-1/errors"
+	"draft-zadania-1/kafka"
 	"draft-zadania-1/models"
 	"draft-zadania-1/repo"
+	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
+	"time"
 )
 
 type TaskService struct {
 	repo     *repo.TaskRepository
 	userRepo *repo.UserRepository
+	kafka    *kafka.KafkaProducer
 }
 
-func NewTaskService(repo *repo.TaskRepository, repository *repo.UserRepository) *TaskService {
-	return &TaskService{repo: repo, userRepo: repository}
+func NewTaskService(repo *repo.TaskRepository, repository *repo.UserRepository, kafka *kafka.KafkaProducer) *TaskService {
+	return &TaskService{repo: repo, userRepo: repository, kafka: kafka}
 }
 
 func (s *TaskService) CreateTask(task models.Task) (*models.Task, error) {
@@ -27,6 +32,21 @@ func (s *TaskService) CreateTask(task models.Task) (*models.Task, error) {
 	}
 
 	createdTask, err := s.repo.Create(task) // :=
+	if err != nil {
+		return nil, appErr.ErrInternal
+	}
+	//jsonTask, err := json.Marshal(createdTask)
+	//err = s.kafka.Produce(context.Background(), "todo-task", jsonTask)
+	event := kafka.TaskEvent{
+		Typ:       "CREATE",
+		TaskId:    createdTask.Id,
+		UserId:    createdTask.UserId,
+		Timestamp: time.Now(),
+	}
+
+	eventJson, err := json.Marshal(event)
+
+	err = s.kafka.Produce(context.Background(), "todo-task", eventJson)
 	if err != nil {
 		return nil, appErr.ErrInternal
 	}
@@ -47,6 +67,21 @@ func (s *TaskService) UpdateTask(task models.Task) (*models.Task, error) {
 		if errors.Is(err, appErr.ErrTaskNotFound) {
 			return nil, err
 		}
+		return nil, appErr.ErrInternal
+	}
+	//jsonTask, err := json.Marshal(updatedTask)
+	//err = s.kafka.Produce(context.Background(), "todo-task", jsonTask)
+	event := kafka.TaskEvent{
+		Typ:       "UPDATE",
+		TaskId:    updatedTask.Id,
+		UserId:    updatedTask.UserId,
+		Timestamp: time.Now(),
+	}
+
+	eventJson, err := json.Marshal(event)
+
+	err = s.kafka.Produce(context.Background(), "todo-task", eventJson)
+	if err != nil {
 		return nil, appErr.ErrInternal
 	}
 	return updatedTask, nil
