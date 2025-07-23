@@ -6,6 +6,7 @@ import (
 	"draft-zadania-1/kafka"
 	"draft-zadania-1/models"
 	"draft-zadania-1/repo"
+	"draft-zadania-1/utils"
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
@@ -46,6 +47,9 @@ func (s *TaskService) CreateTask(task models.Task) (*models.Task, error) {
 
 	eventJson, err := json.Marshal(event)
 
+	//s.kafka.Enqueue("todo-task", eventJson)
+	utils.AddEventToChannel(eventJson)
+
 	err = s.kafka.Produce(context.Background(), "todo-task", eventJson)
 	if err != nil {
 		return nil, appErr.ErrInternal
@@ -79,7 +83,9 @@ func (s *TaskService) UpdateTask(task models.Task) (*models.Task, error) {
 	}
 
 	eventJson, err := json.Marshal(event)
+	utils.AddEventToChannel(eventJson)
 
+	//s.kafka.Enqueue("todo-task", eventJson)
 	err = s.kafka.Produce(context.Background(), "todo-task", eventJson)
 	if err != nil {
 		return nil, appErr.ErrInternal

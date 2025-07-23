@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"draft-zadania-1/api"
 	"draft-zadania-1/config"
 	"draft-zadania-1/kafka"
 	"draft-zadania-1/repo"
 	spec "draft-zadania-1/spec"
+	"draft-zadania-1/utils"
 	"log"
+	"sync"
 	//"draft-zadania-1/router"
 	"draft-zadania-1/services"
 	"github.com/labstack/echo/v4"
@@ -15,10 +18,29 @@ import (
 
 func main() {
 	config.InitDB()
+	utils.InitEventChannel()
+
+	var wg sync.WaitGroup
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	defer wg.Wait()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg := <-utils.EventChan:
+				log.Println("message received from channel:", string(msg))
+			}
+		}
+	}()
+
 	brokers := []string{"localhost:9093"}
 
 	topicNames := []string{"todo-user", "todo-task"}
-
 	if err := kafka.EnsureTopicExists(brokers, topicNames); err != nil {
 		log.Fatalf("Kafka topic init error: %v", err)
 	}
