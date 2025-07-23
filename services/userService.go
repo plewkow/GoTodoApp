@@ -6,6 +6,7 @@ import (
 	"draft-zadania-1/kafka"
 	"draft-zadania-1/models"
 	"draft-zadania-1/repo"
+	"draft-zadania-1/utils"
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
@@ -36,6 +37,10 @@ func (s *UserService) CreateUser(user models.User) (*models.User, error) {
 
 	eventJson, err := json.Marshal(event)
 
+	//s.kafka.Enqueue("todo-user", eventJson)
+
+	utils.AddEventToChannel(eventJson)
+
 	err = s.kafka.Produce(context.Background(), "todo-user", eventJson)
 	return createdUser, nil
 }
@@ -58,6 +63,9 @@ func (s *UserService) UpdateUser(user models.User) (*models.User, error) {
 	}
 
 	eventJson, err := json.Marshal(event)
+
+	//s.kafka.Enqueue("todo-user", eventJson)
+	utils.AddEventToChannel(eventJson)
 
 	err = s.kafka.Produce(context.Background(), "todo-user", eventJson)
 	return updatedUser, nil
